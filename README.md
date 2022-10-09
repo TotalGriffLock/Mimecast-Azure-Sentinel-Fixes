@@ -1,6 +1,9 @@
 # Mimecast-Azure-Sentinel-Fixes
 Reliability fixes made to the Mimecast log agent for Azure Sentinel
 
+# Disclaimer
+I am not a python coder! I am an infuriated security engineer. I am sure this could be done better.
+
 I have found using the Mimecast Azure Sentinel agent in production that it has a few shortcomings. This patch resolves the below issues:
 
 1. Flush SIEM API logs to disk regularly when retrieving a large number of logs. Without this the Mimecast code will try and download all available logs and store them in 1 python dictionary in RAM. If you have gigs of logs waiting to be retrieved (say on a large customer account after a period of extended downtime) this means gigs of RAM are needed for the dictionary. The patch changes this to flush to disk every 25 messages.
