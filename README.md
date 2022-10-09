@@ -1,2 +1,17 @@
 # Mimecast-Azure-Sentinel-Fixes
 Reliability fixes made to the Mimecast log agent for Azure Sentinel
+
+I have found using the Mimecast Azure Sentinel agent in production that it has a few shortcomings. This patch resolves the below issues:
+
+1. Flush SIEM API logs to disk regularly when retrieving a large number of logs. Without this the Mimecast code will try and download all available logs and store them in 1 python dictionary in RAM. If you have gigs of logs waiting to be retrieved (say on a large customer account after a period of extended downtime) this means gigs of RAM are needed for the dictionary.
+2. Skip invalid ZIP/JSON data served by the API. Without this the Mimecast code will fall over upon encountering bad data and stop retrieving logs. This means the bad data is still there next time it checks in and it will stop again, and your log retrieval will fail until Mimecast remove the bad data from the API queue. Unfortunately Mimecast's support solution to this is delete the application definition in the API and recreate it.
+
+To apply the patch, assuming you have installed the Mimecast agent in the default location of /opt:
+
+1. curl -Lo /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch https://raw.githubusercontent.com/TotalGriffLock/Mimecast-Azure-Sentinel-Fixes/main/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch 
+2. cd /opt
+3. patch -p0 < /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch
+
+Mimecast, if you are reading this, please:
+  a) put your code on github so we can submit pull requests / fixes, as your support don't seem keen on them
+  b) distribute your code as python is meant to be distributed, not with a half built venv in a zip file which only works on 1 non current version of Ubuntu
