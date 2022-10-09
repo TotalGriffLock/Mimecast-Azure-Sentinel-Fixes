@@ -10,9 +10,9 @@ I have found using the Mimecast Azure Sentinel agent in production that it has a
 To apply the patch, assuming you have installed the Mimecast agent in the default location of /opt:
 
 ```
-1. curl -Lo /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch https://raw.githubusercontent.com/TotalGriffLock/Mimecast-Azure-Sentinel-Fixes/main/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch 
-2. cd /opt
-3. patch -p0 < /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch
+curl -Lo /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch https://raw.githubusercontent.com/TotalGriffLock/Mimecast-Azure-Sentinel-Fixes/main/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch 
+cd /opt
+patch -p0 < /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch
 ```
 
 Mimecast, if you are reading this, please:
