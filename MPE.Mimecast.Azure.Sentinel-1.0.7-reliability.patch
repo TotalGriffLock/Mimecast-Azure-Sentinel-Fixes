@@ -1,0 +1,55 @@
+diff -ruN MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/Helpers/siem_response_helper.py /opt/MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/Helpers/siem_response_helper.py
+--- MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/Helpers/siem_response_helper.py      2020-07-31 09:20:52.000000000 +0000
++++ /opt/MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/Helpers/siem_response_helper.py 2022-05-06 07:11:30.429756934 +0000
+@@ -3,6 +3,8 @@
+ import json
+ import io
+
++import logging
++logger = logging.getLogger('mimecast')
+
+ class SIEMResponseHelper:
+     """SIEMResponseHelper responsible for checking is token in response headers and parsing responses."""
+@@ -49,7 +51,12 @@
+             if file_format == 'key_value':
+                 raw_events = SIEMResponseHelper.parse_key_value_response(content)
+             else:
+-                raw_events = json.loads(content, encoding='utf-8')['data']
++                try:
++                    raw_events = json.loads(content, encoding='utf-8')['data']
++                except Exception as e:
++                    logger.error('Bad JSON data in file {0}, skipping this row. Bad data below'.format(file_name))
++                    logger.error(format(content))
++                    pass
+             for raw_event in raw_events:
+                 raw_event.update({'logType': log_type})
+             events += raw_events
+diff -ruN MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/mimecast_api_wrapper.py /opt/MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/mimecast_api_wrapper.py
+--- MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/mimecast_api_wrapper.py      2020-07-31 09:20:52.000000000 +0000
++++ /opt/MPE.Mimecast.Azure.Sentinel-1.0.7/MPE.Mimecast.Azure.Sentinel.Common/venv/lib/python3.7/site-packages/Mimecast/mimecast_api_wrapper.py 2022-05-06 06:52:41.658945932 +0000
+@@ -72,7 +72,6 @@
+ from Mimecast.Helpers.response_helper import ResponseHelper
+ from Mimecast.Models.Enum.mimecast_endpoints import MimecastEndpoints
+
+-
+ class MimecastAPIWrapper(MimecastAPIWrapperInterface):
+     """MimecastAPIWrapper package responsible for communication with Mimecast API endpoints."""
+
+@@ -394,7 +393,8 @@
+         has_more_logs = True
+         mapped_response_data = []
+         model = {}
+-        while has_more_logs:
++        n = 0
++        while has_more_logs and n < 25:
+             model = GetSIEMLogsRequest(log_type, file_format, next_token)
+             response = self.request_helper.send_post_request(model.payload, MimecastEndpoints.get_siem_logs)
+             self.response_helper.check_response_codes(response, MimecastEndpoints.get_siem_logs)
+@@ -403,6 +403,7 @@
+                                                                               MimecastEndpoints.get_siem_logs)
+             mapped_response_data = GetSIEMLogsResponse.map_response_data(success_response)
+             has_more_logs, next_token = SIEMResponseHelper.get_siem_next_token(response)
++            n = n + 1
+         else:
+             mapped_response_data.insert(0, {'checkpoints': model.payload['data'][0]['token']})
+         SIEMResponseHelper.response = []
