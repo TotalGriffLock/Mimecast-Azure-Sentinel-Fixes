@@ -22,7 +22,7 @@ patch -p0 < /tmp/MPE.Mimecast.Azure.Sentinel-1.0.7-reliability.patch
 
 Mimecast, if you are reading this, please:
 1. Put your code on Github so we can submit pull requests / fixes, as your support don't seem keen on them
-2. Distribute your code as python is meant to be distributed, not with a half built venv in a zip file which only works on 1 non current version of Ubuntu
+2. Distribute your code as python is meant to be distributed, not with a half built venv in a zip file which only works on 1 end-of-life version of Ubuntu for which you force your customers to buy extended support
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
